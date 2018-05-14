@@ -2,9 +2,13 @@
 
 function app(){
 
-	var svg;
-	var map = MapWithLayers();
-	var migrants;
+	let svg;
+	let map = MapWithLayers();  // component to handle the map
+	let migrants;  // variable containing all the reports
+
+	let colorByReport = d3.scaleOrdinal()
+		.domain(["Interdiction","Landing"])
+		.range(["red","green"]);
 
 	function me(selection){
 
@@ -21,7 +25,7 @@ function app(){
 		.then(function (json){
 			console.log("raw data", json);
 			migrants = json.map(function(d,i){
-				var r =  {
+				let r =  {
 					EncounterDate: d.EncounterDate,
 					NumDeaths: +d.NumDeaths,
 					Passengers: +d.Passengers,
@@ -37,13 +41,11 @@ function app(){
 					r['LaunchCoords'] = [+d.LaunchCoords[0],+d.LaunchCoords[1]];
 				return r;
 			})
-
+			// result of transformation
 			console.log("migrants", migrants);
 
-
-
 			// transform reports to a FeatureCollection
-			var fcReports = {
+			let fcReports = {
 				type:"FeatureCollection",
 				features: migrants
 				.map(function(d,i){  // for each entry in Museums dictionary
@@ -70,22 +72,25 @@ function app(){
 
 
 			// dynamic computation of centroid
-			var extentX = d3.extent(migrants, function(d){return d.EncounterCoords[0]});
-			var extentY = d3.extent(migrants, function(d){return d.EncounterCoords[1]});
+			let extentX = d3.extent(migrants, function(d){return d.EncounterCoords[0]});
+			let extentY = d3.extent(migrants, function(d){return d.EncounterCoords[1]});
 			console.log("extentX", extentX);
 			console.log("extentY", extentY);
-			var centroid = [(extentX[0]+extentX[1])/2,(extentY[0]+extentY[1])/2];
+			let centroid = [(extentX[0]+extentX[1])/2,(extentY[0]+extentY[1])/2];
 			console.log("centroid", centroid);
 
 			map.center(centroid)
 				.scale(3000);
 
 
-				console.log('svg',svg);
-				var gReports = svg.append("g")
-					.attr("class","reports")
-					.datum(fcReports)
-				.call(map);
+			let gReports = svg.append("g")
+				.attr("class","reports")
+				.datum(fcReports)
+			.call(map);
+
+			gReports.selectAll("path")
+				.attr('opacity', 0.6)
+				.attr('fill', function(d){return colorByReport(d.properties.RecordType)})
 
 		});
 
@@ -100,6 +105,6 @@ function app(){
 
 
 
-var myApp = app();
+let myApp = app();
 d3.select("#viz")
 .call(myApp);
