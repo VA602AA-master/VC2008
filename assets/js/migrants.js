@@ -88,12 +88,24 @@ function app(){
 				.datum(fcReports)
 			.call(map);
 
+
+
 			gReports.selectAll("path")
 				.attr('opacity', 0.6)
 				.attr('fill', function(d){return colorByReport(d.properties.RecordType)})
 
 		});
 
+		let gWorld = svg.append('g')
+			.attr('class','mapWorld');
+
+		d3.json('assets/data/world.geojson')
+			.then(function(world){
+				// removing Antartide since there is a problem with the contour geometry
+				world.features = world.features.filter(function(d){return d.properties.CNTR_ID != "AQ"});
+				gWorld.datum(world)
+				.call(map);
+			})
 
 	}
 
