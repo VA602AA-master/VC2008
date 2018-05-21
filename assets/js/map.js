@@ -21,8 +21,16 @@ function MapWithLayers(){
 		}).addTo(map);
 
 		let circleLayer = L.d3SvgOverlay(refreshMap);
-
 		circleLayer.addTo(map);
+
+
+		// https://leafletjs.com/reference-1.3.0.html#imageoverlay
+		// Creating reference to island myApp
+		let imageUrl = 'assets/mapIsland.jpg',
+    	imageBounds = [ [23.42,-80.52], [24.15,-79.45]];
+		L.imageOverlay(imageUrl, imageBounds).addTo(map);
+
+
 	}
 
 	// getter and setter for variable center
@@ -45,9 +53,15 @@ refreshMap = function(selection, projection){
 	var updateSelection = selection.selectAll('circle').data(points);
 	updateSelection.enter()
 			.append('circle')
-			.attr('r',5)
+			.attr('r',2)
 			.attr("cx", function(d) {return projection.latLngToLayerPoint(d.ll).x })
-			.attr("cy", function(d) {return projection.latLngToLayerPoint(d.ll).y });
+			.attr("cy", function(d) {return projection.latLngToLayerPoint(d.ll).y })
+			.classed('interdiction',function(d){return d.properties.RecordType==='Interdiction'})
+			.classed('landing',function(d){return d.properties.RecordType==='Landing'})
+			.attr('fill',function(d){
+				return (d.properties.RecordType==='Interdiction'? 'red':'green')
+			})
+			.attr('opacity',0.5);
 		}
 
 
