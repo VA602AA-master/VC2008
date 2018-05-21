@@ -79,8 +79,7 @@ function app(){
 			let centroid = [(extentX[0]+extentX[1])/2,(extentY[0]+extentY[1])/2];
 			console.log("centroid", centroid);
 
-			map.center(centroid)
-				.scale(3000);
+			map.center(centroid);
 
 			let gReports = selection
 				.style('height','400px')

@@ -17,51 +17,29 @@ function MapWithLayers(){
 	function me(selection){
 		console.log("MapWithLayers", selection.datum());
 
-		var boundaries = selection.node().parentNode.getBoundingClientRect();
-		console.log("dimensions", boundaries);
-		projection = d3.geoMercator()
-			.scale(scale)
-			.center(center)
-		.translate([boundaries.width/2, boundaries.height/2]);
-
-		path = d3.geoPath().projection(projection);
-
 		map = L.map(selection.node()).setView(center.reverse(),6);
 
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 		}).addTo(map);
 
+		let circleLayer = L.d3SvgOverlay(function(selection, projection){
+			console.log(selection);
+	    var updateSelection = selection.selectAll('circle').data([center]);
+	    updateSelection.enter()
+	        .append('circle')
+	        .attr('r',50)
+	        .attr("cx", function(d) {
 
-		// // path.pointRadius(function(d){
-		// // 	return radius(d.properties.count);
-		// // })
-		//
-		//
-		// // create a group container for map
-		//
-		// var paths = selection.selectAll("path")
-		// 	.data(selection.datum().features);
-		//
-		// paths.exit().remove();
-		//
-		// paths.enter()
-		// .append("path");
-		//
-		//
-		//
-		// selection.selectAll("path").attr("d", path);
+						let ll = L.latLng(d[0], d[1]);
+						console.log('ll',ll);
+						return projection.latLngToLayerPoint(ll).x })
+	        .attr("cy", function(d) {
+						let ll = L.latLng(d[0], d[1]);
+						return projection.latLngToLayerPoint(ll).y });
 
-	}
-
-
-	// getter and setter for variable scale
-	me.scale = function(_){
-		if(!arguments.length) return scale;
-		scale = _;
-		projection.scale(scale);
-
-		return me;
+				});
+		circleLayer.addTo(map);
 	}
 
 	// getter and setter for variable center
