@@ -6,39 +6,22 @@
 
 
 function MapWithLayers(){
-	var projection = d3.geoMercator();
-	var scale = 100; // default value for scale
 	var center = [0,0]; // default value for centering the map
-	var path;
-	var gmap;
 
 	let map;
+	let data;
 
 	function me(selection){
 		console.log("MapWithLayers", selection.datum());
-
+		data = selection.datum();
 		map = L.map(selection.node()).setView(center.reverse(),6);
 
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 		}).addTo(map);
 
-		let circleLayer = L.d3SvgOverlay(function(selection, projection){
-			console.log(selection);
-	    var updateSelection = selection.selectAll('circle').data([center]);
-	    updateSelection.enter()
-	        .append('circle')
-	        .attr('r',50)
-	        .attr("cx", function(d) {
+		let circleLayer = L.d3SvgOverlay(refreshMap);
 
-						let ll = L.latLng(d[0], d[1]);
-						console.log('ll',ll);
-						return projection.latLngToLayerPoint(ll).x })
-	        .attr("cy", function(d) {
-						let ll = L.latLng(d[0], d[1]);
-						return projection.latLngToLayerPoint(ll).y });
-
-				});
 		circleLayer.addTo(map);
 	}
 
@@ -46,11 +29,26 @@ function MapWithLayers(){
 	me.center = function(_){
 		if(!arguments.length) return center;
 		center = _;
-		projection.center(center);
-
 		return me;
 	}
 
+
+refreshMap = function(selection, projection){
+	console.log('map datum',data);
+	let points = data.features.map(function(f){
+		return {
+			ll:L.latLng(f.geometry.coordinates.reverse()),
+			properties: f.properties,
+		}
+	})
+
+	var updateSelection = selection.selectAll('circle').data(points);
+	updateSelection.enter()
+			.append('circle')
+			.attr('r',5)
+			.attr("cx", function(d) {return projection.latLngToLayerPoint(d.ll).x })
+			.attr("cy", function(d) {return projection.latLngToLayerPoint(d.ll).y });
+		}
 
 
 	return me;
