@@ -12,6 +12,8 @@ function MapWithLayers(){
 	var path;
 	var gmap;
 
+	let map;
+
 	function me(selection){
 		console.log("MapWithLayers", selection.datum());
 
@@ -24,24 +26,31 @@ function MapWithLayers(){
 
 		path = d3.geoPath().projection(projection);
 
-		// path.pointRadius(function(d){
-		// 	return radius(d.properties.count);
-		// })
+		map = L.map(selection.node()).setView(center.reverse(),6);
+
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		}).addTo(map);
 
 
-		// create a group container for map
-
-		var paths = selection.selectAll("path")
-			.data(selection.datum().features);
-
-		paths.exit().remove();
-
-		paths.enter()
-		.append("path");
-
-
-
-		selection.selectAll("path").attr("d", path);
+		// // path.pointRadius(function(d){
+		// // 	return radius(d.properties.count);
+		// // })
+		//
+		//
+		// // create a group container for map
+		//
+		// var paths = selection.selectAll("path")
+		// 	.data(selection.datum().features);
+		//
+		// paths.exit().remove();
+		//
+		// paths.enter()
+		// .append("path");
+		//
+		//
+		//
+		// selection.selectAll("path").attr("d", path);
 
 	}
 

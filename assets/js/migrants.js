@@ -16,9 +16,9 @@ function app(){
 
 		// Creation of the containing SVG element for the map
 		//
-		svg = selection.append("svg")
-			.attr('height',500)
-			.attr('width',"100%");
+		// svg = selection.append("svg")
+		// 	.attr('height',500)
+		// 	.attr('width',"100%");
 
 		// loading geographical data
 		d3.json("assets/data/migrant.json")
@@ -82,11 +82,15 @@ function app(){
 			map.center(centroid)
 				.scale(3000);
 
-
-			let gReports = svg.append("g")
-				.attr("class","reports")
+			let gReports = selection
+				.style('height','400px')
 				.datum(fcReports)
-			.call(map);
+				.call(map);
+
+			// let gReports = svg.append("g")
+			// 	.attr("class","reports")
+			// 	.datum(fcReports)
+			// .call(map);
 
 			gReports.selectAll("path")
 				.attr('opacity', 0.6)
