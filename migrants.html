@@ -4,11 +4,16 @@
     <meta charset="utf-8">
     <title>Vast Challenge 2008</title>
     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+
     <script src="node_modules/d3/dist/d3.min.js" charset="utf-8"></script>
     <script src="node_modules/crossfilter/crossfilter.min.js" charset="utf-8"></script>
-    <script src="assets/js/counter.js" charset="utf-8"></script>
 
+    <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script src="assets/js/counter.js" charset="utf-8"></script>
     <script src="assets/js/map.js" charset="utf-8"></script>
+    <script src="assets/js/chart.js" charset="utf-8"></script>
     <style type="text/css" media="screen">
             #viz .reports path{
 
@@ -16,6 +21,10 @@
 
             #viz .mapWorld path{
                 fill: lightgray;
+            }
+
+            .charts{
+              height:300px;
             }
         </style>
   </head>
@@ -34,7 +43,7 @@
             </div>
         </div>
         <div class="row">
-            <div id="charts" class="col-xs-12">
+            <div id="charts" class="row" style="width:100%">
 
             </div>
         </div>

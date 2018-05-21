@@ -97,7 +97,8 @@ function app() {
           return d.NumDeaths
         }).value())
 
-				createCounters();
+        createCounters();
+				createCharts();
 
         // transform reports to a FeatureCollection
         let fcReports = {
@@ -167,39 +168,68 @@ function app() {
       })
   }
 
-	// utility functions
-	function createCounters() {
-		counterDescriptor = [{
-			measure: "# Records",
-			cfAggregator: cf.groupAll().reduceCount(),
-			classed: "counter-num-records"
-		}, {
-			measure: "# Passengers",
-			cfAggregator: cf.groupAll().reduceSum(function(d) {
-				return d.Passengers
-			}),
-			classed: "counter-Passengers"
-		}, {
-			measure: "# Deaths",
-			cfAggregator: cf.groupAll().reduceSum(function(d) {
-				return d.NumDeaths
-			}),
-			classed: "counter-num-records"
-		}]
+  // utility functions
+  function createCounters() {
+    counterDescriptor = [{
+      measure: "# Records",
+      cfAggregator: cf.groupAll().reduceCount(),
+      classed: "counter-num-records"
+    }, {
+      measure: "# Passengers",
+      cfAggregator: cf.groupAll().reduceSum(function(d) {
+        return d.Passengers
+      }),
+      classed: "counter-Passengers"
+    }, {
+      measure: "# Deaths",
+      cfAggregator: cf.groupAll().reduceSum(function(d) {
+        return d.NumDeaths
+      }),
+      classed: "counter-num-records"
+    }]
 
 
-		counterDescriptor.forEach(function(d) {
-			var counter = Counter().measure(d.measure);
-			d.counter = counter;
-			let cnt = d3.select("#counters")
-				.append("div")
-				.classed(d.classed, true)
-				.classed("col-xs-12", true)
-				.datum(d.cfAggregator.value())
-				.call(counter);
-				console.log('meas', d.cfAggregator.value());
-		})
-	}
+    counterDescriptor.forEach(function(d) {
+      var counter = Counter().measure(d.measure);
+      d.counter = counter;
+      let cnt = d3.select("#counters")
+        .append("div")
+        .classed(d.classed, true)
+        .classed("col-xs-12", true)
+        .datum(d.cfAggregator.value())
+        .call(counter);
+      console.log('meas', d.cfAggregator.value());
+    })
+  }
+
+  function createCharts() {
+    chartDescriptors = [{
+      dimension: "Vessel Type",
+      cfDimension: dVesselType,
+      classed: "chart-VesselType"
+    }, {
+      dimension: "Year",
+      cfDimension: dYear,
+      classed: "chart-Year"
+    }, {
+      dimension: "Record Type",
+      cfDimension: dRecordType,
+      classed: "chart-RecordType"
+    }, ];
+
+
+    chartDescriptors.forEach(function(d) {
+      var chart = CrossFilterChart().dimension(d.dimension);
+      d.chart = chart;
+      d3.select("#charts")
+        .append("div")
+        .classed(d.classed, true)
+        .classed("col-md-4", true)
+        .classed('charts',true)
+        .datum(d.cfDimension.group().reduceCount().all())
+        .call(chart);
+    })
+  }
 
 
   return me;
