@@ -59,8 +59,5 @@ function MapWithLayers() {
 
     return me;
   }
-
-
-
   return me;
 }

@@ -11,11 +11,12 @@ function app() {
   let dMonth; // dimension for Month
   let dVesselType; // dimension for VesselType
 
-
-
   let colorByReport = d3.scaleOrdinal()
     .domain(["Interdiction", "Landing"])
     .range(["red", "green"]);
+
+  // dispacther for hte events
+  var dispatch = d3.dispatch("changeYear", "changeRecordType");
 
   function me(selection) {
 
@@ -98,7 +99,7 @@ function app() {
         }).value())
 
         createCounters();
-				createCharts();
+        createCharts();
 
         // transform reports to a FeatureCollection
         let fcReports = {
@@ -165,7 +166,9 @@ function app() {
         });
         gWorld.datum(world)
           .call(map);
-      })
+      });
+    createToolbar();
+    registerEventListeners();
   }
 
   // utility functions
@@ -225,12 +228,178 @@ function app() {
         .append("div")
         .classed(d.classed, true)
         .classed("col-md-4", true)
-        .classed('charts',true)
+        .classed('charts', true)
         .datum(d.cfDimension.group().reduceCount().all())
         .call(chart);
     })
   }
 
+  function createToolbar(migrants) {
+    var toolbar = d3.select("#toolbar");
+
+
+    // create a selector for Years
+    toolbar.append("label")
+      .attr("style", "margin-right:5px")
+      .text("Years:");
+
+    var tbYear = toolbar.append("div")
+      .attr('id', 'mode-group')
+      .attr('class', 'btn-group year-group')
+      .attr('data-toggle', 'buttons')
+      .attr('style', 'margin-right:20px; margin-bottom: 10px')
+      .selectAll("button")
+      .data([2005, 2006, 2007])
+      .enter()
+      .append("button")
+      .attr('class','btn btn-group btn-default')
+      .attr('role', 'group')
+      // .append("input")
+      // 			.attr({type:"radio", name:"mode", id:"option1"})
+      .text(function(d) {
+        return d
+      })
+      .on("click", function(d) {
+        dispatch.call('changeYear',d);
+        console.log("click year", d);
+      });
+
+    toolbar.append("label")
+      .attr("style", "margin-right:5px")
+      .text("RecordType:");
+
+    var tbRecordType = toolbar.append("div")
+      .attr('id', 'mode-group')
+      .attr('class', 'btn-group recordtype-group')
+      .attr('data-toggle', 'buttons')
+      .attr('style', 'margin-right:20px; margin-bottom: 10px')
+      .selectAll("button")
+      .data(["All", "Interdiction", "Landing"])
+      .enter()
+      .append("button")
+      .attr('class','btn btn-group btn-default')
+      .attr('role', 'group')
+      // .append("input")
+      // 			.attr({type:"radio", name:"mode", id:"option1"})
+      .text(function(d) {
+        return d
+      })
+      .on("click", function(d) {
+        dispatch.call('changeRecordType',d);
+        console.log("click type", d)
+      });
+  }
+
+  function registerEventListeners() {
+    var colorReport = d3.scaleOrdinal()
+      .domain(["Interdiction", "Landing"])
+      .range(["red", "green"]);
+
+    dispatch.on("changeYear.buttons", function(newYear) {
+      console.log("changeYear.buttons");
+      d3.select("#toolbar").select("div.year-group")
+        .selectAll("button")
+        .classed("active", function(d) {
+          return d == newYear
+        })
+        .classed("btn-primary", function(d) {
+          return d == newYear
+        });
+    });
+
+    dispatch.on("changeYear.charts", function(newYear) {
+      dYear.filter(newYear);
+      chartDescriptors.forEach(function(d) {
+        d.chart.refresh(d.cfDimension.group().reduceCount().all());
+      })
+      counterDescriptor.forEach(function(d) {
+        d.counter.refresh(d.cfAggregator.value())
+      })
+    })
+
+    dispatch.on("changeYear.map", function(newYear) {
+      refreshMap(dYear);
+    });
+
+    dispatch.on("changeRecordType.buttons", function(newRecordType) {
+      console.log("changeRecordType.buttons");
+      d3.select("#toolbar").select("div.recordtype-group")
+        .selectAll("button")
+        .classed("active", function(d) {
+          return d == newRecordType
+        })
+        .classed("btn-primary", function(d) {
+          return d == newRecordType
+        });
+    });
+
+    dispatch.on("changeRecordType.charts", function(newRecordType) {
+      if (newRecordType == "All")
+        dRecordType.filterAll()
+      else
+        dRecordType.filter(newRecordType);
+      chartDescriptors.forEach(function(d) {
+        d.chart.refresh(d.cfDimension.group().reduceCount().all());
+      });
+      counterDescriptor.forEach(function(d) {
+        d.counter.refresh(d.cfAggregator.value())
+      })
+    })
+
+    dispatch.on("changeRecordType.map", function(newRecordType) {
+      refreshMap(dRecordType);
+    });
+
+    d3.select("#description")
+      .selectAll("a.RecordType")
+      .on("click", function(d) {
+        dispatch.changeRecordType(
+          d3.select(this).text()
+        );
+      })
+    d3.select("#description")
+      .selectAll("a.Year")
+      .on("click", function(d) {
+        dispatch.changeYear(
+          d3.select(this).text()
+        );
+      })
+  }
+
+  function refreshMap(cfDimension){
+		var fcReports = {
+			type:"FeatureCollection",
+			features: cfDimension.top(Infinity)
+			.map(function(d,i){  // for each entry in Museums dictionary
+				if(d.EncounterCoords)
+					return {
+						type:"Feature",
+						properties:{
+							EncounterDate: d.EncounterDate,
+							NumDeaths: +d.NumDeaths,
+							Passengers: +d.Passengers,
+							RecordNotes: d.RecordNotes,
+							RecordType: d.RecordType,
+							USCG_Vessel: d.USCG_Vessel,
+							VesselType: d.VesselType,
+							year: d.year
+						},
+						geometry:{
+							type:"Point",
+							coordinates: d.EncounterCoords
+						}
+					}
+			})
+		};
+
+		svg.select("g.reports")
+			.datum(fcReports)
+		.call(map);
+
+		svg.select("g.reports").selectAll("path")
+			.attr("opacity", 0.6	)
+			.attr("fill", function(d){return colorByReport(d.properties.RecordType)});
+	}
 
   return me;
 }
