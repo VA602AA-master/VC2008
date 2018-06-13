@@ -252,7 +252,7 @@ function app() {
       .data([2005, 2006, 2007])
       .enter()
       .append("button")
-      .attr('class','btn btn-group btn-default')
+      .attr('class','btn btn-group btn-outline-primary')
       .attr('role', 'group')
       // .append("input")
       // 			.attr({type:"radio", name:"mode", id:"option1"})
@@ -260,7 +260,7 @@ function app() {
         return d
       })
       .on("click", function(d) {
-        dispatch.call('changeYear',d);
+        dispatch.call('changeYear', this, d);
         console.log("click year", d);
       });
 
@@ -277,7 +277,7 @@ function app() {
       .data(["All", "Interdiction", "Landing"])
       .enter()
       .append("button")
-      .attr('class','btn btn-group btn-default')
+      .attr('class','btn btn-group btn-outline-primary')
       .attr('role', 'group')
       // .append("input")
       // 			.attr({type:"radio", name:"mode", id:"option1"})
@@ -285,7 +285,7 @@ function app() {
         return d
       })
       .on("click", function(d) {
-        dispatch.call('changeRecordType',d);
+        dispatch.call('changeRecordType', this, d);
         console.log("click type", d)
       });
   }
@@ -296,14 +296,14 @@ function app() {
       .range(["red", "green"]);
 
     dispatch.on("changeYear.buttons", function(newYear) {
-      console.log("changeYear.buttons");
+      console.log("changeYear.buttons", newYear);
       d3.select("#toolbar").select("div.year-group")
         .selectAll("button")
         .classed("active", function(d) {
-          return d == newYear
+          return d === newYear
         })
         .classed("btn-primary", function(d) {
-          return d == newYear
+          return d === newYear
         });
     });
 
@@ -326,10 +326,11 @@ function app() {
       d3.select("#toolbar").select("div.recordtype-group")
         .selectAll("button")
         .classed("active", function(d) {
-          return d == newRecordType
+          console.log(d, newRecordType);
+          return d === newRecordType
         })
         .classed("btn-primary", function(d) {
-          return d == newRecordType
+          return d === newRecordType
         });
     });
 

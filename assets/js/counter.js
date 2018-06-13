@@ -17,7 +17,7 @@ function Counter() {
     h1s = selection.selectAll("h1.value")
       .data([selection.datum()]);
 
-    h1s.enter()
+    h1s = h1s.enter()
       .append("h1")
       .classed("value", true)
       .merge(h1s)
