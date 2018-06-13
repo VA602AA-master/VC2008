@@ -3,28 +3,31 @@
 function CrossFilterChart(){
 	let dimension="Dimension";
 	let plot;
+	let container;
+	let layout ={
+		title:dimension,
+		margin: {
+			l: 50,
+			r: 75,
+			b: 100,
+			t: 100,
+			pad: 4
+		},
+	}
 
 	function me(selection){
 		let myData = transformData(selection.datum())
+		container = selection;
 		console.log("chart data", myData);
-		console.log('node chart', selection.node());
+		console.log('node chart', container.node());
 
-		let layout ={
-			title:dimension,
-			margin: {
-		    l: 50,
-		    r: 75,
-		    b: 100,
-		    t: 100,
-		    pad: 4
-		  },
-		}
-		plot = Plotly.newPlot(selection.node(), myData, layout,{displayModeBar: false});
+		plot = Plotly.newPlot(container.node(), myData, layout,{displayModeBar: false});
 	}
 
 	me.dimension = function(_){
 		if(!arguments.length) return dimension;
 		dimension = _;
+		layout.title = dimension;
 
 		return me;
 	}
@@ -33,6 +36,8 @@ function CrossFilterChart(){
 		console.log('data chart', data);
 		console.log('data transformed chart', transformData(data));
 		// refresh plot after external event
+		let myData = transformData(data);
+		plot = Plotly.react(container.node(), myData, layout,{displayModeBar: false});
 		return me;
 	}
 
