@@ -354,16 +354,12 @@ function app() {
     d3.select("#description")
       .selectAll("a.RecordType")
       .on("click", function(d) {
-        dispatch.changeRecordType(
-          d3.select(this).text()
-        );
+        dispatch.call('changeRecordType', this, d3.select(this).text());
       })
     d3.select("#description")
       .selectAll("a.Year")
       .on("click", function(d) {
-        dispatch.changeYear(
-          d3.select(this).text()
-        );
+        dispatch.call('changeYear', this, d3.select(this).text());
       })
   }
 
