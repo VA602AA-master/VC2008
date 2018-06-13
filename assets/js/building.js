@@ -25,7 +25,6 @@ function BuildingApp() {
         console.log(error);
       });
 
-
     d3.tsv("assets/data/rfid_assignments.txt")
       .then(rows => {
         let ids = rows
@@ -42,10 +41,10 @@ function BuildingApp() {
           });
         console.log("ids", ids);
 
-        var rlist = rfidList();
-        d3.select("#persons")
-          .datum(ids)
-          .call(rlist);
+        me.personList = PersonList();
+  			d3.select("#persons")
+  				.datum(ids)
+  			.call(me.personList);
       });
   }
 
