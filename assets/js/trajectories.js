@@ -18,21 +18,9 @@ function Trajectories() {
       return y(d.y)
     });
 
-  // var brush = d3.svg.brush()
-  //   .x(x)
-  //   .y(y)
-  //   .extent([
-  //     [0, 0],
-  //     [0, 0]
-  //   ])
-  //   .on("brush", brushed)
-  //   .on("brushend", brushended);
+  var brush = d3.brush()
+    .on("end", brushended);
 
-  // var quadtree = d3.geom.quadtree()
-  //   .extent([
-  //     [-1, -1],
-  //     [91 + 1, 60 + 1]
-  //   ]);
 
   var timeExtent = [0, 837];
 
@@ -57,10 +45,9 @@ function Trajectories() {
       return path(d.values.slice(timeExtent[0], timeExtent[1])) + "m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0 ";
     });
 
-    // container.append("g")
-    //   .attr("class", "brush")
-    //   .call(brush)
-    //   .call(brush.event);
+    container.append("g")
+      .attr("class", "brush")
+      .call(brush);
   }
 
   me.timeExtent = function(_) {
@@ -75,35 +62,44 @@ function Trajectories() {
   }
 
   function brushed() {
-    // console.log(brush.extent());
-
+    // to implement on-the-fly render during selection
 
   }
 
   function brushended() {
-    if (brush.empty())
+    if (!d3.event.selection){
       console.log("empty selection");
+      buildingApp.personList.selectMultiplePersons([])
+      return ;
+    }
 
-    var extent = brush.extent();
-
+    // the extent measured in pixel should be mapped back to domain coordinates
+    let extent =
+        d3.event.selection.map( c => {
+          return [x.invert(c[0]), y.invert(c[1])];
+        })
+    ;
+    console.log('original extent',d3.event.selection);
+    console.log('new extent', extent);
     var list = [];
     container.datum().forEach(function(p) { // for each person
-      var lastPoint = p.values[timeExtent[1] - 1];
-
-      if (isWithin(lastPoint, extent))
+      let lastPoint = p.values[timeExtent[1] - 1];
+      // console.log(isWithin(lastPoint, extent), {p:lastPoint, e: extent});
+      if (isWithin(lastPoint, extent)){
+        console.log({p:lastPoint, e: extent});
         list.push({
           id: p.person
         });
+      }
     })
+    console.log('list', list.length);
     buildingApp.personList.selectMultiplePersons(list);
   }
 
   function isWithin(p, e) {
-    return (p.x >= e[0][0]) && (p.x <= e[1][0]) &&
-      (p.y >= e[0][1]) && (p.y <= e[1][1]);
+    return ((p.x >= e[0][0]) && (p.x <= e[1][0])
+          && (p.y >= e[1][1]) && (p.y <= e[0][1]));
   }
-
-
 
   return me;
 }

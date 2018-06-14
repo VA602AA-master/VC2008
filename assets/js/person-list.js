@@ -34,7 +34,7 @@ function PersonList(){
 		}else
 			selectedPersons[d.id] = d;
 
-		dispatch.updatedPersonSelection(d, selectedPersons);
+		dispatch.call('updatedPersonSelection', this, selectedPersons);
 	}
 
 	me.selectMultiplePersons = function(list){
@@ -43,12 +43,12 @@ function PersonList(){
 			selectedPersons[p.id] = p;
 		})
 
-		dispatch.updatedPersonSelection(null, selectedPersons);
+		dispatch.call('updatedPersonSelection', this, selectedPersons);
 	}
 
 	me.unselectAll = function(){
 		selectedPersons = {};
-		dispatch.updatedPersonSelection(null, selectedPersons);
+		dispatch.call('updatedPersonSelection', this, selectedPersons);
 	}
 
 	me.selectedPersons = function(){
